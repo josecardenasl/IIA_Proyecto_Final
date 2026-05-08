@@ -2,14 +2,17 @@ import os
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
 
-
-PDF_DIR      = "data/pdfs"
-VECTORSTORE  = "vectorstore/faiss_index"
-EMBED_MODEL  = "sentence-transformers/all-MiniLM-L6-v2"
-CHUNK_SIZE   = 500
-CHUNK_OVERLAP = 80
+PDF_DIR         = "data/pdfs"
+VECTORSTORE     = "vectorstore/qdrant"
+EMBED_MODEL     = "sentence-transformers/all-MiniLM-L6-v2"
+COLLECTION_NAME = "eafit_docs"
+EMBED_DIM       = 384
+CHUNK_SIZE      = 500
+CHUNK_OVERLAP   = 80
 
 
 def load_pdfs(directory: str):
@@ -19,7 +22,7 @@ def load_pdfs(directory: str):
             path = os.path.join(directory, filename)
             loader = PyMuPDFLoader(path)
             docs.extend(loader.load())
-            print(f"  ✓ Cargado: {filename} ({len(docs)} páginas acumuladas)")
+            print(f"   Cargado: {filename} ({len(docs)} páginas acumuladas)")
     return docs
 
 
@@ -40,9 +43,27 @@ def build_vectorstore(chunks):
         model_name=EMBED_MODEL,
         model_kwargs={"device": "cpu"}
     )
-    vectorstore = FAISS.from_documents(chunks, embeddings)
-    vectorstore.save_local(VECTORSTORE)
-    print(f"  ✓ Vector store guardado en '{VECTORSTORE}'")
+
+    # Cliente local — guarda en disco, sin servidor
+    client = QdrantClient(path=VECTORSTORE)
+
+    # Crea la colección si no existe
+    client.recreate_collection(
+        collection_name=COLLECTION_NAME,
+        vectors_config=VectorParams(
+            size=EMBED_DIM,
+            distance=Distance.COSINE
+        )
+    )
+
+    vectorstore = QdrantVectorStore(
+        client=client,
+        collection_name=COLLECTION_NAME,
+        embedding=embeddings
+    )
+
+    vectorstore.add_documents(chunks)
+    print(f"   Vector store guardado en '{VECTORSTORE}'")
     return vectorstore
 
 
