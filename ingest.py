@@ -1,12 +1,12 @@
 import os
-from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
-PDF_DIR         = "data/pdfs"
+DATA_DIR        = "data/"
 VECTORSTORE     = "vectorstore/qdrant"
 EMBED_MODEL     = "sentence-transformers/all-MiniLM-L6-v2"
 COLLECTION_NAME = "eafit_docs"
@@ -15,14 +15,14 @@ CHUNK_SIZE      = 500
 CHUNK_OVERLAP   = 80
 
 
-def load_pdfs(directory: str):
+def load_data(directory: str):
     docs = []
     for filename in os.listdir(directory):
-        if filename.endswith(".pdf"):
+        if filename.endswith(".md"):
             path = os.path.join(directory, filename)
-            loader = PyMuPDFLoader(path)
+            loader = TextLoader(path, encoding="utf-8")
             docs.extend(loader.load())
-            print(f"   Cargado: {filename} ({len(docs)} páginas acumuladas)")
+            print(f"   Cargado: {filename} ({len(docs)} docs acumulados)")
     return docs
 
 
@@ -72,8 +72,8 @@ if __name__ == "__main__":
     print("  Ingesta de PDFs — RAG EAFIT")
     print("═" * 50)
 
-    print("\n[1/3] Cargando PDFs...")
-    docs = load_pdfs(PDF_DIR)
+    print("\n[1/3] Cargando datos...")
+    docs = load_data(DATA_DIR)
 
     print("\n[2/3] Dividiendo en chunks...")
     chunks = split_documents(docs)
