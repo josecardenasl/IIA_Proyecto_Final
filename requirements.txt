@@ -10,3 +10,4 @@ qdrant-client
 pymupdf
 gradio
 ollama
+python-dotenv
