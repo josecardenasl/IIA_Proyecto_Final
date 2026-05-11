@@ -8,7 +8,7 @@ from qdrant_client.models import Distance, VectorParams
 
 DATA_DIR        = "data/"
 VECTORSTORE     = "vectorstore/qdrant"
-EMBED_MODEL     = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_MODEL     = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 COLLECTION_NAME = "eafit_docs"
 EMBED_DIM       = 384
 CHUNK_SIZE      = 500

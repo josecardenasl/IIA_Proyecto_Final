@@ -11,7 +11,7 @@ from qdrant_client import QdrantClient
 load_dotenv()
 
 VECTORSTORE     = "vectorstore/qdrant"
-EMBED_MODEL     = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_MODEL     = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 COLLECTION_NAME = "eafit_docs"
 LLM_MODEL       = "gemini-2.5-flash"
 TOP_K           = 4

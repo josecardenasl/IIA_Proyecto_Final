@@ -9,7 +9,7 @@ from qdrant_client import QdrantClient
 
 
 VECTORSTORE     = "vectorstore/qdrant"
-EMBED_MODEL     = "sentence-transformers/all-MiniLM-L6-v2"
+EMBED_MODEL     = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 COLLECTION_NAME = "eafit_docs"
 LLM_MODEL       = "llama3.2"
 TOP_K           = 4
