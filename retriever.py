@@ -77,11 +77,15 @@ def query(chain, retriever, question: str):
     response = chain.invoke(question)
     print(f"Respuesta:\n{response}")
     print("\nFuentes utilizadas:")
+    sources = []
     docs = retriever.invoke(question)
     for i, doc in enumerate(docs, 1):
         source = os.path.basename(doc.metadata.get("source", "desconocido"))
         page   = doc.metadata.get("page", "?")
         print(f"  [{i}] {source} — página {page}")
+        sources.append(source)
+    
+    return response, sources
 
 
 if __name__ == "__main__":
