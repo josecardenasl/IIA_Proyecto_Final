@@ -11,8 +11,8 @@ VECTORSTORE     = "vectorstore/qdrant"
 EMBED_MODEL     = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 COLLECTION_NAME = "eafit_docs"
 EMBED_DIM       = 384
-CHUNK_SIZE      = 500
-CHUNK_OVERLAP   = 80
+CHUNK_SIZE      = 1500
+CHUNK_OVERLAP   = 200
 
 
 def load_data(directory: str):
@@ -26,13 +26,33 @@ def load_data(directory: str):
     return docs
 
 
+def get_doc_title(doc) -> str:
+    for line in doc.page_content.splitlines():
+        line = line.strip()
+        if line.startswith("# "):
+            return line.lstrip("# ").strip()
+    source = doc.metadata.get("source", "")
+    return os.path.splitext(os.path.basename(source))[0].replace("_", " ")
+
+
 def split_documents(docs):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
         separators=["\n\n", "\n", ".", " "]
     )
+
+    # Extrae títulos antes de dividir (los chunks pierden el doc original)
+    titles = {doc.metadata.get("source", ""): get_doc_title(doc) for doc in docs}
+
     chunks = splitter.split_documents(docs)
+
+    # Contextual chunking: prefija cada chunk con el H1 del documento
+    for chunk in chunks:
+        source = chunk.metadata.get("source", "")
+        title = titles.get(source, "Universidad EAFIT")
+        chunk.page_content = f"[{title}]\n{chunk.page_content}"
+
     print(f"\n  → {len(docs)} páginas divididas en {len(chunks)} chunks")
     return chunks
 
