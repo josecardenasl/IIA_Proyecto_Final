@@ -11,3 +11,6 @@ pymupdf
 gradio
 ollama
 python-dotenv
+playwright
+html2text
+rank-bm25
